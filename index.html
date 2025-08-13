@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>S‑89 Image Generator (по датам, с напарником)</title>
+    <style>
+      :root {
+        --bg: #0b0e14;
+        --fg: #e6e6e6;
+        --muted: #9aa4b2;
+        --card: #151a22;
+        --accent: #58a6ff;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font: 14px/1.4 system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans",
+          Inter, Arial, sans-serif;
+      }
+      header {
+        padding: 16px 20px;
+        border-bottom: 1px solid #1f2630;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+      header h1 {
+        font-size: 16px;
+        margin: 0;
+        font-weight: 600;
+      }
+      main {
+        display: grid;
+        grid-template-columns: 360px 1fr;
+        gap: 16px;
+        padding: 16px;
+      }
+      .panel {
+        background: var(--card);
+        border: 1px solid #1f2630;
+        border-radius: 14px;
+        padding: 14px;
+      }
+      .panel h2 {
+        margin: 0 0 8px 0;
+        font-size: 14px;
+        color: var(--muted);
+        font-weight: 600;
+      }
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-bottom: 10px;
+      }
+      label {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      input[type="file"],
+      input[type="date"],
+      input[type="number"],
+      button {
+        background: #0f1420;
+        color: var(--fg);
+        border: 1px solid #232b36;
+        border-radius: 10px;
+        padding: 9px 10px;
+      }
+      button {
+        cursor: pointer;
+      }
+      button.primary {
+        background: var(--accent);
+        border-color: transparent;
+        color: #0b0e14;
+        font-weight: 600;
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+      }
+      .list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        max-height: 60vh;
+        overflow: auto;
+      }
+      .item {
+        background: #0f1420;
+        border: 1px solid #232b36;
+        border-radius: 10px;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      .item small {
+        color: var(--muted);
+      }
+      .item .meta {
+        display: flex;
+        flex-direction: column;
+      }
+      .viewer {
+        display: grid;
+        grid-template-rows: auto 1fr;
+        gap: 12px;
+      }
+      .canvasWrap {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 72vh;
+        background: #0f1420;
+        border: 1px dashed #2a3340;
+        border-radius: 12px;
+      }
+      canvas {
+        max-width: 100%;
+        max-height: 100%;
+        image-rendering: crisp-edges;
+      }
+      .hint {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .pill {
+        font-size: 11px;
+        border: 1px solid #2a3340;
+        padding: 2px 8px;
+        border-radius: 999px;
+        color: #a9b4c2;
+      }
+      .spacer {
+        flex: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>S‑89 → изображения (фильтр по датам ...)</h1>
+      <span class="pill">Локально, без загрузки</span>
+      <div class="spacer"></div>
+      <button id="btnExportZip" disabled>Скачать ZIP</button>
+    </header>
+
+    <main>
+      <section class="panel">
+        <h2>Входные данные</h2>
+
+        <div class="field">
+          <label
+            >Шаблон формы (PNG/JPG из S‑89, 1240×1754 px для текущих
+            координат)</label
+          >
+          <input type="file" id="bgFile" accept="image/png,image/jpeg" />
+          <div class="hint">
+            Подсказка: если у тебя другой размер, координаты ниже можно
+            подправить.
+          </div>
+        </div>
+
+        <div class="field">
+          <label
+            >CSV с заданиями (Date,Person,PartType,Assignment,School)</label
+          >
+          <input type="file" id="csvFile" accept="text/csv" />
+        </div>
+
+        <div class="row">
+          <div class="field" style="flex: 1">
+            <label>С даты (включительно)</label>
+            <input type="date" id="dateFrom" />
+          </div>
+          <div class="field" style="flex: 1">
+            <label>По дату (включительно)</label>
+            <input type="date" id="dateTo" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="field" style="flex: 1">
+            <label>Ширина для WhatsApp (px)</label>
+            <input
+              type="number"
+              id="wMobile"
+              value="1280"
+              min="600"
+              max="4096"
+            />
+          </div>
+          <div class="field" style="flex: 1">
+            <label>JPEG качество</label>
+            <input
+              type="number"
+              id="jpegQ"
+              value="0.9"
+              min="0.3"
+              max="0.95"
+              step="0.05"
+            />
+          </div>
+        </div>
+
+        <div class="row">
+          <button id="btnParse" class="primary" disabled>
+            Загрузить и показать
+          </button>
+          <button id="btnGenerate" disabled>Сгенерировать превью</button>
+        </div>
+
+        <h2 style="margin-top: 14px">Задания</h2>
+        <div id="list" class="list"></div>
+      </section>
+
+      <section class="panel viewer">
+        <h2>Просмотр</h2>
+        <div class="canvasWrap">
+          <canvas id="preview" width="0" height="0"></canvas>
+        </div>
+      </section>
+    </main>
+
+    <!-- vendors -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"
+      defer
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"
+      defer
+    ></script>
+
+    <!-- default S-89 -->
+    <img id="defaultTemplate" src="./img/S-89_U.png" hidden>
+
+    <!-- app -->
+    <script src="./app.js" defer></script>
+  </body>
+</html>
