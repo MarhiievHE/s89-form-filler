@@ -3,7 +3,7 @@
 Веб-приложение для автоматического заполнения бланков **S-89** (учебные задания) на основе данных экспорта из NW Scheduler в формате CSV.  
 Работает полностью локально — все файлы обрабатываются прямо в браузере, ничего не отправляется на сервер.
 
-![Пример пустого бланка](./img/S-89_U.png)
+<img src="./img/S-89_U.png" alt="Пример пустого бланка" width="200">
 
 ## Возможности
 
@@ -23,7 +23,7 @@
 1. Открой страницу проекта:
 
 - **Локально** — открой `index.html` в браузере.
-- **Онлайн** — через GitHub Pages (если включено).
+- **Онлайн** — через [GitHub Pages](https://marhiievhe.github.io/s89-form-filler/) (если включено).
 
 2. Выбери PNG/JPG шаблон бланка S-89.
 3. Загрузите CSV с заданиями.
@@ -38,18 +38,11 @@
 Date,Person,PartType,Assignment,School
 2025-05-05,Иван Иванов,BibleReading,Чтение Библии,1
 2025-05-05,Петр Петров,Apply1,Тема выступления,1
-Date — дата встречи (понедельник)
-
-Person — имя основного выступающего
-
-PartType — тип задания (BibleReading, Apply1–Apply4, ...Assistant)
-
-Assignment — тема задания
-
-School — 1 если в главном зале (ставится галочка)
-
-Установка локально
-git clone https://github.com/<твой_ник>/s89-form-filler.git
-cd s89-form-filler
-# открыть index.html в браузере
 ```
+
+Установка локально:
+```bash
+git clone https://github.com/MarhiievHE/s89-form-filler.git
+cd s89-form-filler
+```
+открыть index.html в браузере
